@@ -3,27 +3,23 @@
 //Project 1 - Source Code
 
 #include "yash.h"
-#include <sys/wait.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <sys/types.h>
+
 
 
 int main(int argc, char *argv[]){
 	char inputString[2000 + 1];
-	int pipefd[3];
 	int noOfTok;
 	pid_t cpid;
 
 	while(1){	
 	    Node *head = (Node *)malloc(sizeof(Node));											
 		printf("# ");
-		noOfTok = CreateTokenList(inputString, head);
+		noOfTok = createTokenList(inputString, head);
+		char** argv;
+		createArgvArray(noOfTok, head, argv);
 		cpid = fork();
 		if(cpid == 0){
-			ExecuteCMD(head, noOfTok);
+			executeCMD(head, noOfTok);
 		}else{
 			int status;
 			waitpid(cpid, &status, 0);
@@ -39,7 +35,7 @@ int main(int argc, char *argv[]){
 *Creates a linked list of all tokens in the input
 *And returns the # of tokens
 */
-int CreateTokenList(char *inputString, Node *head){
+int createTokenList(char *inputString, Node *head){
 	int count = 0;
 	fgets(inputString, 2001, stdin);
 	inputString[strcspn(inputString, "\n")] = 0;
@@ -66,7 +62,7 @@ int CreateTokenList(char *inputString, Node *head){
 }
 
 
-void ExecuteCMD(Node *head, int length){
+void executeCMD(Node *head, int length){
 	char *argv[length];
 	int argc = length;
 	Node *temp = head;
@@ -90,4 +86,42 @@ void ExecuteCMD(Node *head, int length){
 	free(head->token);
 	free(head);
 
+}
+
+void createArgvArray(int argc, Node* head, char** pointer){
+	char* argv[argc];
+	Node* temp = head;
+	for(int i = 0; i < argc; i++){
+		argv[i] = temp->token;
+		temp = temp->next;
+	}
+	pointer = argv;
+}
+
+pipeline_t* createPipeline(int argc, char** argv){
+	pipeline_t* job = (pipeline_t *)malloc(sizeof(pipeline_t));
+	job->ProcessID = 0;
+	job->next = 0;
+	job->argv = 0;
+	job->stdin = 0;
+	job->stdout = 1;
+	job->stderr = 2;
+	job->bg = 0;
+
+	pipeline_t* temp = job;
+	for(int i = 0; i < argc; i++){
+		if(strcmp(argv[i], "|") == 0){
+
+		}else if(strcmp(argv[i], "&") == 0){
+
+		}else if(strcmp(argv[i], "<") == 0){
+
+		}else if(strcmp(argv[i], ">") == 0){
+
+		}else if(strcmp(argv[i], "2>") == 0){
+
+		}else if(strcmp(argv[i], "2>&1") == 0){
+
+		}
+	}
 }
